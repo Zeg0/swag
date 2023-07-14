@@ -218,7 +218,7 @@ func (operation *Operation) ParseMetadata(attribute, lowerAttribute, lineRemaind
 	return nil
 }
 
-// https://go.dev/play/p/_UBIbhCestu
+// https://go.dev/play/p/DJMoN0LTjIe
 var paramPattern = regexp.MustCompile(`(\S+)\s+(\w+)\s+([\S. ]+?)\s+(\w+)\s*(?:"([^"]+)")?\s*(?:"([^"]+)")?`)
 
 func findInSlice(arr []string, target string) bool {
@@ -231,7 +231,7 @@ func findInSlice(arr []string, target string) bool {
 	return false
 }
 
-func printSlice(slc []string, start int) string {
+func slice2str(slc []string, start int) string {
 	if start > len(slc)-1 {
 		return ""
 	}
@@ -251,7 +251,7 @@ func printSlice(slc []string, start int) string {
 func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.File) error {
 	matches := paramPattern.FindStringSubmatch(commentLine)
 	if Debug {
-		fmt.Println("DEBUG: ", paramAttr, commentLine, "=>\n", printSlice(matches, 1))
+		fmt.Println("DEBUG: ", paramAttr, commentLine, "=>\n", slice2str(matches, 1))
 	}
 	if len(matches) != 7 {
 		return fmt.Errorf("missing required param comment parameters \"%s\"", commentLine)
@@ -684,7 +684,7 @@ func defineType(schemaType string, value string) (v interface{}, err error) {
 func (operation *Operation) ParseTagsComment(commentLine string) {
 	comments := strings.Split(commentLine, ",")
 	if Debug {
-		fmt.Println("DEBUG: ", tagsAttr, printSlice(comments, 1))
+		fmt.Println("DEBUG: ", tagsAttr, slice2str(comments, 1))
 	}
 	for _, tag := range comments {
 		operation.Tags = append(operation.Tags, strings.TrimSpace(tag))
@@ -729,7 +729,7 @@ var routerPattern = regexp.MustCompile(`^(/[\w./\-{}+:$]*)[[:blank:]]+\[(\w+)]`)
 func (operation *Operation) ParseRouterComment(commentLine string) error {
 	matches := routerPattern.FindStringSubmatch(commentLine)
 	if Debug {
-		fmt.Println("DEBUG: ", routerAttr, commentLine, "=>", printSlice(matches, 1))
+		fmt.Println("DEBUG: ", routerAttr, commentLine, "=>", slice2str(matches, 1))
 	}
 	if len(matches) != 3 {
 		return fmt.Errorf("can not parse router comment \"%s\"", commentLine)
@@ -758,7 +758,7 @@ func (operation *Operation) ParseSecurityComment(commentLine string) error {
 
 	secOptions := strings.Split(securitySource, "||")
 	if Debug {
-		fmt.Println("DEBUG: ", tagsAttr, commentLine, "=>", printSlice(secOptions, 1))
+		fmt.Println("DEBUG: ", tagsAttr, commentLine, "=>", slice2str(secOptions, 1))
 	}
 
 	for _, securityOption := range secOptions {
@@ -845,7 +845,8 @@ func findTypeDef(importPath, typeName string) (*ast.TypeSpec, error) {
 	return nil, fmt.Errorf("type spec not found")
 }
 
-var responsePattern = regexp.MustCompile(`^([\w,]+)\s+([\w{}]+)\s+([\w\-.\\{}=,\[\s\]]+)\s*(".*)?`)
+// https://go.dev/play/p/DJMoN0LTjIe
+var responsePattern = regexp.MustCompile(`^([\w,]+)\s+([\w{}]+)\s+([\w\-.\\{}=,\[\s\]]+)\s*(?:"([^"]+)")?\s*(?:"([^"]+)")?`)
 
 // ResponseType{data1=Type1,data2=Type2}.
 var combinedPattern = regexp.MustCompile(`^([\w\-./\[\]]+){(.*)}$`)
@@ -1004,9 +1005,9 @@ func (operation *Operation) parseAPIObjectSchema(commentLine, schemaType, refTyp
 func (operation *Operation) ParseResponseComment(op string, commentLine string, astFile *ast.File) error {
 	matches := responsePattern.FindStringSubmatch(commentLine)
 	if Debug {
-		fmt.Println("DEBUG: ", op, commentLine, "=>", printSlice(matches, 1))
+		fmt.Println("DEBUG: ", op, commentLine, "=>", slice2str(matches, 1))
 	}
-	if len(matches) < 5 {
+	if len(matches) != 6 {
 		err := operation.ParseEmptyResponseComment(commentLine)
 		if err != nil {
 			return operation.ParseEmptyResponseOnly(commentLine)
@@ -1015,15 +1016,24 @@ func (operation *Operation) ParseResponseComment(op string, commentLine string, 
 		return err
 	}
 
-	description := strings.Trim(matches[4], "\"")
-
 	schema, err := operation.parseAPIObjectSchema(commentLine, strings.Trim(matches[2], "{}"), strings.TrimSpace(matches[3]), astFile)
 	if err != nil {
 		return err
 	}
 
-	if len(matches) >= 6 {
-		schemaExample := matches[4]
+	preLast := matches[4]
+	last := matches[5]
+	schemaExample := ""
+	description := ""
+	if preLast != "" && last != "" {
+		schemaExample = preLast
+		description = last
+	} else if preLast != "" && last == "" {
+		schemaExample = ""
+		description = preLast
+	}
+
+	if schemaExample != "" {
 		schema.SwaggerSchemaProps.Example = schemaExample
 	}
 
@@ -1082,7 +1092,7 @@ func newHeaderSpec(schemaType, description string) spec.Header {
 func (operation *Operation) ParseResponseHeaderComment(commentLine string, _ *ast.File) error {
 	matches := responsePattern.FindStringSubmatch(commentLine)
 	if Debug {
-		fmt.Println("DEBUG: ", headerAttr, commentLine, "=>", printSlice(matches, 1))
+		fmt.Println("DEBUG: ", headerAttr, commentLine, "=>", slice2str(matches, 1))
 	}
 	if len(matches) != 5 {
 		return fmt.Errorf("can not parse response comment \"%s\"", commentLine)
