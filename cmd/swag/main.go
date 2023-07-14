@@ -22,6 +22,7 @@ const (
 	outputFlag            = "output"
 	outputTypesFlag       = "outputTypes"
 	parseVendorFlag       = "parseVendor"
+	debugFlag             = "debug"
 	parseDependencyFlag   = "parseDependency"
 	markdownFilesFlag     = "markdownFiles"
 	codeExampleFilesFlag  = "codeExampleFiles"
@@ -79,6 +80,10 @@ var initFlags = []cli.Flag{
 		Aliases: []string{"ot"},
 		Value:   "go,json,yaml",
 		Usage:   "Output types of generated files (docs.go, swagger.json, swagger.yaml) like go,json,yaml",
+	},
+	&cli.BoolFlag{
+		Name:  debugFlag,
+		Usage: "Enable some more debug",
 	},
 	&cli.BoolFlag{
 		Name:  parseVendorFlag,
@@ -165,6 +170,9 @@ var initFlags = []cli.Flag{
 
 func initAction(ctx *cli.Context) error {
 	strategy := ctx.String(propertyStrategyFlag)
+
+	debug := ctx.Bool(debugFlag)
+	swag.Debug = debug
 
 	switch strategy {
 	case swag.CamelCase, swag.SnakeCase, swag.PascalCase:

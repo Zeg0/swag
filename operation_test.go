@@ -2254,7 +2254,7 @@ func TestParseResponseHeaderComment(t *testing.T) {
 
 	operation := NewOperation(nil)
 	operation.Responses = &spec.Responses{}
-	err := operation.ParseResponseComment(`default {string} string "other error"`, nil)
+	err := operation.ParseResponseComment(responseAttr, `default {string} string "other error"`, nil)
 	assert.NoError(t, err)
 	err = operation.ParseResponseHeaderComment(`all {string} Token "qwerty"`, nil)
 	assert.NoError(t, err)
