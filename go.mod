@@ -24,6 +24,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
+	github.com/swaggo/swag v1.16.1 // indirect
 	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.8.0 // indirect
@@ -32,6 +33,6 @@ require (
 )
 
 retract (
-	v1.9.0 // published accidentally
 	v1.16.0 // published accidentally
+	v1.9.0 // published accidentally
 )
