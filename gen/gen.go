@@ -15,8 +15,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/Zeg0/swag"
 	"github.com/go-openapi/spec"
-	"github.com/swaggo/swag"
 	"sigs.k8s.io/yaml"
 )
 
@@ -64,6 +64,8 @@ func New() *Gen {
 
 // Config presents Gen configurations.
 type Config struct {
+	Debug bool
+
 	Debugger swag.Debugger
 
 	// SearchDir the swag would parse,comma separated if multiple
@@ -144,6 +146,9 @@ type Config struct {
 func (g *Gen) Build(config *Config) error {
 	if config.Debugger != nil {
 		g.debug = config.Debugger
+	}
+	if config.Debug {
+		swag.Debug = true
 	}
 	if config.InstanceName == "" {
 		config.InstanceName = swag.Name

@@ -173,6 +173,9 @@ func initAction(ctx *cli.Context) error {
 
 	debug := ctx.Bool(debugFlag)
 	swag.Debug = debug
+	if debug {
+		fmt.Println("enabled debug")
+	}
 
 	switch strategy {
 	case swag.CamelCase, swag.SnakeCase, swag.PascalCase:
@@ -207,6 +210,7 @@ func initAction(ctx *cli.Context) error {
 	}
 
 	return gen.New().Build(&gen.Config{
+		Debug:               debug,
 		SearchDir:           ctx.String(searchDirFlag),
 		Excludes:            ctx.String(excludeFlag),
 		ParseExtension:      ctx.String(parseExtensionFlag),
