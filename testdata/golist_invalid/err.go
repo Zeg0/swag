@@ -1,0 +1,3 @@
+package invalid
+
+function a() {}

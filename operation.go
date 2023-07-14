@@ -236,7 +236,7 @@ func findInSlice(arr []string, target string) bool {
 // E.g. @Param   some_id     path    int     true        "Some ID".
 func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.File) error {
 	matches := paramPattern.FindStringSubmatch(commentLine)
-	if len(matches) != 6 {
+	if len(matches) < 6 {
 		return fmt.Errorf("missing required param comment parameters \"%s\"", commentLine)
 	}
 
@@ -270,9 +270,15 @@ func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.F
 
 	requiredText := strings.ToLower(matches[4])
 	required := requiredText == "true" || requiredText == requiredLabel
-	description := matches[5]
 
-	param := createParameter(paramType, description, name, objectType, refType, required, enums, operation.parser.collectionFormatInQuery)
+	defaultExample := ""
+	if len(matches) == 7 {
+		defaultExample = matches[5]
+	}
+
+	description := matches[len(matches)-1]
+
+	param := createParameter(paramType, description, name, objectType, refType, required, enums, operation.parser.collectionFormatInQuery, defaultExample)
 
 	switch paramType {
 	case "path", "header":
@@ -335,10 +341,10 @@ func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.F
 					if !IsSimplePrimitiveType(itemSchema.Type[0]) {
 						continue
 					}
-					param = createParameter(paramType, prop.Description, formName, prop.Type[0], itemSchema.Type[0], findInSlice(schema.Required, name), itemSchema.Enum, operation.parser.collectionFormatInQuery)
+					param = createParameter(paramType, prop.Description, formName, prop.Type[0], itemSchema.Type[0], findInSlice(schema.Required, name), itemSchema.Enum, operation.parser.collectionFormatInQuery, prop.Default)
 
 				case IsSimplePrimitiveType(prop.Type[0]):
-					param = createParameter(paramType, prop.Description, formName, PRIMITIVE, prop.Type[0], findInSlice(schema.Required, name), nil, operation.parser.collectionFormatInQuery)
+					param = createParameter(paramType, prop.Description, formName, PRIMITIVE, prop.Type[0], findInSlice(schema.Required, name), nil, operation.parser.collectionFormatInQuery, prop.Default)
 				default:
 					operation.parser.debug.Printf("skip field [%s] in %s is not supported type for %s", name, refType, paramType)
 					continue
@@ -962,7 +968,7 @@ func (operation *Operation) parseAPIObjectSchema(commentLine, schemaType, refTyp
 // ParseResponseComment parses comment for given `response` comment string.
 func (operation *Operation) ParseResponseComment(commentLine string, astFile *ast.File) error {
 	matches := responsePattern.FindStringSubmatch(commentLine)
-	if len(matches) != 5 {
+	if len(matches) < 5 {
 		err := operation.ParseEmptyResponseComment(commentLine)
 		if err != nil {
 			return operation.ParseEmptyResponseOnly(commentLine)
@@ -976,6 +982,11 @@ func (operation *Operation) ParseResponseComment(commentLine string, astFile *as
 	schema, err := operation.parseAPIObjectSchema(commentLine, strings.Trim(matches[2], "{}"), strings.TrimSpace(matches[3]), astFile)
 	if err != nil {
 		return err
+	}
+
+	if len(matches) >= 6 {
+		schemaExample := matches[4]
+		schema.SwaggerSchemaProps.Example = schemaExample
 	}
 
 	for _, codeStr := range strings.Split(matches[1], ",") {
@@ -1155,7 +1166,7 @@ func (operation *Operation) AddResponse(code int, response *spec.Response) {
 }
 
 // createParameter returns swagger spec.Parameter for given  paramType, description, paramName, schemaType, required.
-func createParameter(paramType, description, paramName, objectType, schemaType string, required bool, enums []interface{}, collectionFormat string) spec.Parameter {
+func createParameter(paramType, description, paramName, objectType, schemaType string, required bool, enums []interface{}, collectionFormat string, defaultValue interface{}) spec.Parameter {
 	// //five possible parameter types. 	query, path, body, header, form
 	result := spec.Parameter{
 		ParamProps: spec.ParamProps{
@@ -1164,6 +1175,9 @@ func createParameter(paramType, description, paramName, objectType, schemaType s
 			Required:    required,
 			In:          paramType,
 		},
+	}
+	if fmt.Sprint(defaultValue) != "" {
+		result = *result.WithDefault(defaultValue)
 	}
 
 	if paramType == "body" {
