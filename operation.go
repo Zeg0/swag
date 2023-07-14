@@ -239,7 +239,7 @@ func findInSlice(arr []string, target string) bool {
 func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.File) error {
 	matches := paramPattern.FindStringSubmatch(commentLine)
 	if Debug {
-		fmt.Println("DEBUG: ", paramAttr, matches)
+		fmt.Println("DEBUG: ", paramAttr, commentLine, "=>", matches)
 	}
 	if len(matches) < 6 {
 		return fmt.Errorf("missing required param comment parameters \"%s\"", commentLine)
@@ -711,7 +711,7 @@ var routerPattern = regexp.MustCompile(`^(/[\w./\-{}+:$]*)[[:blank:]]+\[(\w+)]`)
 func (operation *Operation) ParseRouterComment(commentLine string) error {
 	matches := routerPattern.FindStringSubmatch(commentLine)
 	if Debug {
-		fmt.Println("DEBUG: ", routerAttr, matches)
+		fmt.Println("DEBUG: ", routerAttr, commentLine, "=>", matches)
 	}
 	if len(matches) != 3 {
 		return fmt.Errorf("can not parse router comment \"%s\"", commentLine)
@@ -740,7 +740,7 @@ func (operation *Operation) ParseSecurityComment(commentLine string) error {
 
 	secOptions := strings.Split(securitySource, "||")
 	if Debug {
-		fmt.Println("DEBUG: ", tagsAttr, secOptions)
+		fmt.Println("DEBUG: ", tagsAttr, commentLine, "=>", secOptions)
 	}
 
 	for _, securityOption := range secOptions {
@@ -986,7 +986,7 @@ func (operation *Operation) parseAPIObjectSchema(commentLine, schemaType, refTyp
 func (operation *Operation) ParseResponseComment(op string, commentLine string, astFile *ast.File) error {
 	matches := responsePattern.FindStringSubmatch(commentLine)
 	if Debug {
-		fmt.Println("DEBUG: ", op, matches)
+		fmt.Println("DEBUG: ", op, commentLine, "=>", matches)
 	}
 	if len(matches) < 5 {
 		err := operation.ParseEmptyResponseComment(commentLine)
@@ -1064,7 +1064,7 @@ func newHeaderSpec(schemaType, description string) spec.Header {
 func (operation *Operation) ParseResponseHeaderComment(commentLine string, _ *ast.File) error {
 	matches := responsePattern.FindStringSubmatch(commentLine)
 	if Debug {
-		fmt.Println("DEBUG: ", headerAttr, matches)
+		fmt.Println("DEBUG: ", headerAttr, commentLine, "=>", matches)
 	}
 	if len(matches) != 5 {
 		return fmt.Errorf("can not parse response comment \"%s\"", commentLine)

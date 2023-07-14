@@ -171,9 +171,7 @@ var initFlags = []cli.Flag{
 func initAction(ctx *cli.Context) error {
 	strategy := ctx.String(propertyStrategyFlag)
 
-	debug := ctx.Bool(debugFlag)
-	swag.Debug = debug
-	if debug {
+	if ctx.Bool(debugFlag) {
 		fmt.Println("enabled debug")
 	}
 
@@ -210,7 +208,7 @@ func initAction(ctx *cli.Context) error {
 	}
 
 	return gen.New().Build(&gen.Config{
-		Debug:               debug,
+		Debug:               ctx.Bool(debugFlag),
 		SearchDir:           ctx.String(searchDirFlag),
 		Excludes:            ctx.String(excludeFlag),
 		ParseExtension:      ctx.String(parseExtensionFlag),
