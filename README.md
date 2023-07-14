@@ -335,7 +335,7 @@ For example, use
 //  @Accept       json
 //  @Produce      json
 //  @Param        q    query     string  false  "name search by q"  Format(email)
-//  @Success      200  {array}   model.Account
+//  @Success      200  {array}   model.Account 
 //  @Failure      400  {object}  httputil.HTTPError
 //  @Failure      404  {object}  httputil.HTTPError
 //  @Failure      500  {object}  httputil.HTTPError
@@ -498,15 +498,16 @@ Besides that, `swag` also accepts aliases for some MIME Types as follows:
 ## Attribute
 
 ```go
-// @Param   enumstring  query     string     false  "string enums"       Enums(A, B, C)
-// @Param   enumint     query     int        false  "int enums"          Enums(1, 2, 3)
-// @Param   enumnumber  query     number     false  "int enums"          Enums(1.1, 1.2, 1.3)
-// @Param   string      query     string     false  "string valid"       minlength(5)  maxlength(10)
-// @Param   int         query     int        false  "int valid"          minimum(1)    maximum(10)
-// @Param   default     query     string     false  "string default"     default(A)
-// @Param   example     query     string     false  "string example"     example(string)
-// @Param   collection  query     []string   false  "string collection"  collectionFormat(multi)
-// @Param   extensions  query     []string   false  "string collection"  extensions(x-example=test,x-nullable)
+// @Param   enumstring  query     string     false                    "string enums"               Enums(A, B, C)
+// @Param   enumint     query     int        false                    "int enums"                  Enums(1, 2, 3)
+// @Param   enumnumber  query     number     false                    "int enums"                  Enums(1.1, 1.2, 1.3)
+// @Param   string      query     string     false                    "string valid"               minlength(5)  maxlength(10)
+// @Param   string      query     string     false    "your_token"    "this is the description"    minlength(5)  maxlength(10)
+// @Param   int         query     int        false                    "int valid"                  minimum(1)    maximum(10)
+// @Param   default     query     string     false                    "string default"             default(A)
+// @Param   example     query     string     false                    "string example"             example(string)
+// @Param   collection  query     []string   false                    "string collection"          collectionFormat(multi)
+// @Param   extensions  query     []string   false                    "string collection"          extensions(x-example=test,x-nullable)
 ```
 
 It also works for the struct fields:
@@ -637,6 +638,7 @@ type DeepObject struct { //in `proto` package
 
 ```go
 // @Success      200              {string}  string    "ok"
+// @Success      200              {string}  string    "success" "ok"
 // @failure      400              {string}  string    "error"
 // @response     default          {string}  string    "other error"
 // @Header       200              {string}  Location  "/entity/1"
