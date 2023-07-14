@@ -218,6 +218,7 @@ func (operation *Operation) ParseMetadata(attribute, lowerAttribute, lineRemaind
 	return nil
 }
 
+// https://go.dev/play/p/_UBIbhCestu
 var paramPattern = regexp.MustCompile(`^(\S+)\s+(\w+)\s+([\S. ]+?)\s+(\w+)\s*(?:"([^"]+)")?\s*(?:"([^"]+)")?"`)
 
 func findInSlice(arr []string, target string) bool {
@@ -245,6 +246,7 @@ func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.F
 		return fmt.Errorf("missing required param comment parameters \"%s\"", commentLine)
 	}
 
+	// match 0 is the whole string unchanged
 	name := matches[1]
 	paramType := matches[2]
 	refType := TransToValidSchemeType(matches[3])
