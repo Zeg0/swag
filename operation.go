@@ -218,7 +218,7 @@ func (operation *Operation) ParseMetadata(attribute, lowerAttribute, lineRemaind
 	return nil
 }
 
-var paramPattern = regexp.MustCompile(`^(\S+)\s+(\w+)\s+([\S. ]+?)\s+(\w+)\s+"([^"]*)"(\s+"([^"]*)")?"`)
+var paramPattern = regexp.MustCompile(`^(\S+)\s+(\w+)\s+([\S. ]+?)\s+(\w+)\s*(?:"([^"]+)")?\s*(?:"([^"]+)")?"`)
 
 func findInSlice(arr []string, target string) bool {
 	for _, str := range arr {
@@ -241,7 +241,7 @@ func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.F
 	if Debug {
 		fmt.Println("DEBUG: ", paramAttr, commentLine, "=>", matches)
 	}
-	if len(matches) < 6 {
+	if len(matches) != 7 {
 		return fmt.Errorf("missing required param comment parameters \"%s\"", commentLine)
 	}
 
@@ -276,12 +276,17 @@ func (operation *Operation) ParseParamComment(commentLine string, astFile *ast.F
 	requiredText := strings.ToLower(matches[4])
 	required := requiredText == "true" || requiredText == requiredLabel
 
+	preLast := matches[5]
+	last := matches[6]
 	defaultExample := ""
-	if len(matches) == 7 {
-		defaultExample = matches[5]
+	description := ""
+	if preLast != "" && last != "" {
+		defaultExample = preLast
+		description = last
+	} else if preLast != "" && last == "" {
+		defaultExample = ""
+		description = preLast
 	}
-
-	description := matches[len(matches)-1]
 
 	param := createParameter(paramType, description, name, objectType, refType, required, enums, operation.parser.collectionFormatInQuery, defaultExample)
 
